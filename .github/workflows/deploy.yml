@@ -1,0 +1,41 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 只读代码 + 写 Pages + 用 OIDC 令牌部署（GitHub 官方推荐的最小权限集）
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同时只跑一个部署；不打断进行中的部署，避免发布半成品
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # withastro/action 负责：装 Node、装依赖、跑 `npm run build`、上传 Pages 产物
+      - name: Build with Astro
+        uses: withastro/action@v4
+        with:
+          node-version: 22
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

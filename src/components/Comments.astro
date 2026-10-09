@@ -1,0 +1,43 @@
+---
+/**
+ * Giscus 评论组件（基于 GitHub Discussions）
+ *
+ * 为什么是 Giscus 而不是 Gitalk：
+ *   1. Giscus 不需要你自建 GitHub OAuth App（Gitalk 需要，且 clientSecret 会写进前端）
+ *   2. Discussions 天生支持楼中楼和反应表情（Issues 是平铺的）
+ *   3. 用官方托管的 giscus App，零后端、零运维
+ *
+ * 唯一前提：评论者需要有 GitHub 账号。
+ * 数据存在你自己的仓库 Discussions 里，可 grep、可导出、可迁移。
+ */
+import config from "@/config";
+
+const giscus = config.comments?.giscus;
+const enabled = config.comments?.provider === "giscus" && Boolean(giscus);
+---
+
+{
+  enabled && (
+    <div class="mt-8">
+      <hr class="mb-8 border-dashed" />
+      <script
+        is:inline
+        src="https://giscus.app/client.js"
+        data-repo={giscus!.repo}
+        data-repo-id={giscus!.repoId}
+        data-category={giscus!.category}
+        data-category-id={giscus!.categoryId}
+        data-mapping={giscus!.mapping ?? "pathname"}
+        data-strict={giscus!.strict ? "1" : "0"}
+        data-reactions-enabled={giscus!.reactionsEnabled === false ? "0" : "1"}
+        data-emit-metadata="0"
+        data-input-position={giscus!.inputPosition ?? "top"}
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+        data-loading={giscus!.loading ?? "lazy"}
+        crossorigin="anonymous"
+        async
+      />
+    </div>
+  )
+}
