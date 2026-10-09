@@ -29,11 +29,19 @@ const t = useTranslations(Astro.currentLocale);
 
 const isModified = modDatetime && modDatetime > pubDatetime;
 
-const datetime = dayjs(isModified ? modDatetime : pubDatetime).tz(
-  postTimezone ?? config.site.timezone
-);
+const tz = postTimezone ?? config.site.timezone;
 
-const date = datetime.format("D MMM, YYYY");
+const datetime = dayjs(isModified ? modDatetime : pubDatetime).tz(tz);
+
+// 用 Intl 按 locale 输出日期，而不是硬编码 "D MMM, YYYY"。
+// 原模板写死了英文格式，中文站会显示成 "9 Oct, 2026"；
+// Intl 在 zh-CN 下会正确输出 "2026年10月9日"。
+const date = new Intl.DateTimeFormat(Astro.currentLocale ?? config.site.lang, {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  timeZone: tz,
+}).format(datetime.toDate());
 ---
 
 <div
